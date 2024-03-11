@@ -3,7 +3,6 @@ from intervaltree import Interval, IntervalTree
 
 
 def main():
-    # assuming a single ref path (e.g., 1 chromosome)
     gfa_path = sys.argv[1]
 
     k = 0  # FIXME: if we use a value>0, we must be sure to extend to a node in the ref path
@@ -29,12 +28,14 @@ def main():
             assert all(b >= a for a, b in zip(nodes[:-1], nodes[1:]))
             tree[nodes[0] - k : nodes[-1] + k + 1] = 1
 
+    # FIXME: add position on reference
+    # TODO: this work for a single reference path (e.g., 1 chromosome)
     # Get reference position for each node on the reference path
-    ref_positions = {}
-    p = 0
-    for n in ref_path:
-        ref_positions[n] = p
-        p += nodes_l[n]
+    # ref_positions = {}
+    # p = 0
+    # for n in ref_path:
+    #     ref_positions[n] = p
+    #     p += nodes_l[n]
 
     print("#genes:", len(tree), file=sys.stderr)
     tree.merge_overlaps()
@@ -59,8 +60,8 @@ def main():
                 hit = list(hit)[0]
                 c = clusters[(hit.begin, hit.end)]
                 line = line[:-1] + f"\tGL:i:{c}"
-                if idx in ref_positions:
-                    line += f"\tRP:i:{ref_positions[idx]}"
+                # if idx in ref_positions:
+                #     line += f"\tRP:i:{ref_positions[idx]}"
                 line += "\n"
                 print(line, file=gfa, end="")
         elif line.startswith("L"):
