@@ -12,7 +12,7 @@ cd ..
 
 ### Prerequisites
 * [vg](https://github.com/vgteam/vg)
-* python3 (+ intervaltree seaborn pandas matplotlib)
+* python3 (+ intervaltree seaborn pandas matplotlib networkx)
 
 
 ### Example
