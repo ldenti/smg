@@ -51,6 +51,7 @@ def main():
     max_cluster_size = 100000
 
     # Load components sizes from GFA (as total number of characters)
+    print("Load GFA...", file=sys.stderr)
     components = {}
     for line in open(gfa_path):
         if line.startswith("S"):
@@ -60,6 +61,7 @@ def main():
             components[gl] = components[gl] + len(seq) if gl in components else len(seq)
 
     # Load minimizers and loci information
+    print("Load minimizers...", file=sys.stderr)
     minimizers = {}
     loci = {}
     for line in open(fpath):
@@ -71,10 +73,12 @@ def main():
         loci[locus] = loci[locus] | set([mmer]) if locus in loci else set([mmer])
 
     # Remove overexpressed mmers
+    print("Filter minimizers...", file=sys.stderr)
     for locus, mmers in loci.items():
         loci[locus] = mmers - set([mmer for mmer in mmers if minimizers[mmer] > w])
 
     # Build clusters based on jaccard similarity
+    print("Clustering based on jaccard similarity...", file=sys.stderr)
     clusters = []
     used_flags = [0 for _ in loci]
     for i, (l1, mm1) in enumerate(loci.items()):
@@ -90,6 +94,7 @@ def main():
     clusters.sort(reverse=True, key=lambda x: sum([components[c] for c in x]))
 
     # Merge clusters based on their size to have the most balanced clusters we can have
+    print("Merging clusters...", file=sys.stderr)
     new_clusters = [clusters[0]]
     prev_cluster_size = sum([components[c] for c in clusters[0]])
     for cluster in clusters[1:]:
@@ -109,18 +114,19 @@ def main():
         prev_cluster_size += sum([components[c] for c in cluster])
 
     # Create new clusters by minimizers merging (useless now)
-    clusters = []
-    for i, cluster in enumerate(new_clusters):
-        print(
-            "-",
-            i,
-            len(cluster),
-            ",".join([str(c) for c in cluster]),
-            sum([components[c] for c in cluster]),
-        )
-        clusters.append([cluster, set.union(*[loci[c] for c in cluster])])
+    # clusters = []
+    # for i, cluster in enumerate(new_clusters):
+    #     print(
+    #         "-",
+    #         i,
+    #         len(cluster),
+    #         ",".join([str(c) for c in cluster]),
+    #         sum([components[c] for c in cluster]),
+    #     )
+    #     clusters.append([cluster, set.union(*[loci[c] for c in cluster])])
 
     # Build tree structure
+    print("Building tree...", file=sys.stderr)
     nodes = [Node(str(x)) for x in list(range(len(new_clusters)))]
     new_nodes = []
     while len(nodes) > 1:
@@ -138,9 +144,11 @@ def main():
         new_nodes = []
 
     # Print tree to stdout
+    print("Printing tree...", file=sys.stderr)
     print_tree(root)
 
     # Draw tree
+    print("Drawing tree...", file=sys.stderr)
     root = nodes[0]
     T = nx.DiGraph()
     build_tree(T, root)
