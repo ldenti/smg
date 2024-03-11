@@ -50,7 +50,7 @@ int main(int argc, char *argv[]) {
       mg128_t minimizer = minimizers.a[j];
       if (!(minimizer.y & 1))
         continue; // FIXME
-      printf("%d %d\n", minimizer.x >> 8, *(int32_t *)(c_tag + 1));
+      printf("%ld %d\n", minimizer.x >> 8, *(int32_t *)(c_tag + 1));
       /* printf("minimizer: %d\n", minimizer.x >> 8); */
       /* printf("kmerSpan: %d\n", minimizer.x & 0xFF); */
       /* printf("rid: %d\n", minimizer.y >> 32); */
