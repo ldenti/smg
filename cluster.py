@@ -115,15 +115,15 @@ def main():
 
     # Create new clusters by minimizers merging (useless now)
     # clusters = []
-    # for i, cluster in enumerate(new_clusters):
-    #     print(
-    #         "-",
-    #         i,
-    #         len(cluster),
-    #         ",".join([str(c) for c in cluster]),
-    #         sum([components[c] for c in cluster]),
-    #     )
-    #     clusters.append([cluster, set.union(*[loci[c] for c in cluster])])
+    for i, cluster in enumerate(new_clusters):
+        print(
+            "-",
+            i,
+            len(cluster),
+            ",".join([str(c) for c in cluster]),
+            sum([components[c] for c in cluster]),
+        )
+        # clusters.append([cluster, set.union(*[loci[c] for c in cluster])])
 
     # Build tree structure
     print("Building tree...", file=sys.stderr)
