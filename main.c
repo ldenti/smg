@@ -2,10 +2,13 @@
 #include <zlib.h>
 
 #include "gfa.h"
+#include "kseq.h"
 #include "mgpriv.h"
 #include "minigraph.h"
 
-int main(int argc, char *argv[]) {
+KSEQ_INIT(gzFile, gzread)
+
+int main_gfa(int argc, char *argv[]) {
   char *gfa_path = argv[1];
 
   /* k and w for minimizers */
@@ -48,8 +51,8 @@ int main(int argc, char *argv[]) {
     /* printf("#minimizers: %d\n", minimizers.n); */
     for (j = 0; j < minimizers.n; ++j) {
       mg128_t minimizer = minimizers.a[j];
-      if (!(minimizer.y & 1))
-        continue; // FIXME
+      /* if (!(minimizer.y & 1)) */
+      /*   continue; // FIXME */
       printf("%ld %d\n", minimizer.x >> 8, *(int32_t *)(c_tag + 1));
       /* printf("minimizer: %d\n", minimizer.x >> 8); */
       /* printf("kmerSpan: %d\n", minimizer.x & 0xFF); */
@@ -63,6 +66,51 @@ int main(int argc, char *argv[]) {
   }
 
   free(minimizers.a);
+  /* kh_destroy(hm64, hm); */
 
   return 0;
+}
+
+int main_fx(int argc, char *argv[]) {
+  char *fx_fn = argv[1];
+
+  /* k and w for minimizers */
+  uint k = 17, w = 11;
+
+  gzFile fp = gzopen(fx_fn, "rb");
+  kseq_t *ks = kseq_init(fp);
+  int l, i, j;
+  mg128_v minimizers = {0, 0, 0};
+  while ((l = kseq_read(ks)) >= 0) {
+    for (j = 0; j < ks->seq.l; ++j)
+      if (ks->seq.s[j] >= 'a' && ks->seq.s[j] <= 'z')
+        ks->seq.s[j] -= 32;
+
+    minimizers.n = 0;
+    mg_sketch(0, ks->seq.s, ks->seq.l, w, k, i, &minimizers);
+
+    printf("%s", ks->name.s);
+    for (j = 0; j < minimizers.n; ++j) {
+      mg128_t minimizer = minimizers.a[j];
+      /* if (!(minimizer.y & 1)) */
+      /*   continue; // FIXME */
+      printf(" %d", minimizer.x >> 8);
+    }
+    printf("\n");
+  }
+
+  free(minimizers.a);
+  kseq_destroy(ks);
+  gzclose(fp);
+
+  return 0;
+}
+
+int main(int argc, char *argv[]) {
+  if (strcmp(argv[1], "gfa") == 0)
+    return main_gfa(argc - 1, argv + 1);
+  else if (strcmp(argv[1], "fx") == 0)
+    return main_fx(argc - 1, argv + 1);
+  else
+    return 1;
 }
